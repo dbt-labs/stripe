@@ -10,12 +10,14 @@ All data models are built to be compiled and run with [dbt](https://github.com/a
 1. Add the following configuration to your `dbt_project.yml`:
 
 ```YAML
-models:
+#don't duplicate this
+models:                                     
   stripe:
     enabled: true
     materialized: view
     vars:
-      events_table: 'stripe.stripe_events' #insert the location of your stripe_events table here as 'schema.table'
+      #insert the location of your stripe_events table here as 'schema.table'
+      events_table: 'stripe.stripe_events'  
 ```
 
 ### Contributing
