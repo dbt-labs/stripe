@@ -13,3 +13,5 @@ models:
   stripe:
     enabled: true
     materialized: view
+    vars:
+      events_table: 'stripe.stripe_events'

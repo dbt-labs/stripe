@@ -1,2 +1,2 @@
 select *
-from stripe.stripe_events
+from {{ var('events_table') }}
