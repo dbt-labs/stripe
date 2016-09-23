@@ -17,13 +17,12 @@ with events as (
     event_type,
     status,
     mrr,
-    product,
     plan_interval,
     max(created_at) as created_at
   from events
   where status not in ('trialing', 'past_due')
     and (event_type != 'customer.subscription.deleted' or prior_status = 'past_due')
-  group by 1, 2, 3, 4, 5, 6, 7, 8
+  group by 1, 2, 3, 4, 5, 6, 7
 
 ), customers as (
   -- this CTE grabs the begin and end date for a given customer; we need this to create days records for the entire duration.
@@ -56,12 +55,7 @@ select distinct
      (partition by customer_days.customer_id, customer_days.date_day
       order by created_at
       rows between unbounded preceding and unbounded following
-    ) as plan_interval,
-    last_value(product) over
-      (partition by customer_days.customer_id, customer_days.date_day
-       order by created_at
-       rows between unbounded preceding and unbounded following
-     ) as product
+    ) as plan_interval
 from customer_days
   left outer join events_filtered
     on customer_days.date_day >= events_filtered.period_start::date

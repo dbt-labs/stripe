@@ -34,7 +34,6 @@ select
   prior_mrr,
   mrr_change,
   plan_interval,
-  product,
   case
     when first_day is true and mrr > 0
       then 'new'

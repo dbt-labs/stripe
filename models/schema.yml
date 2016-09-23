@@ -9,7 +9,7 @@ stripe_subscription_events:
       - status
       - plan_interval
       - mrr
-      - product
+
     accepted_values:
       - {field: plan_interval, values: ['month', 'year']}
     relationships:

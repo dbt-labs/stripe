@@ -12,8 +12,6 @@ with mrr as (
     mrr_change,
     lag(plan_interval, 1) ignore nulls over
       (partition by customer_id order by date_day) as plan_interval,
-    lag(product, 1) ignore nulls over
-      (partition by customer_id order by date_day) as product,
     change_category,
     active_customer
   from mrr

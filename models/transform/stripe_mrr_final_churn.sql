@@ -9,7 +9,6 @@ select
   customer_id,
   0::numeric(38,6) as mrr,
   plan_interval,
-  product,
   null::boolean as first_day,
   null::boolean as last_day
 from mrr

@@ -16,7 +16,7 @@ with events as (
     data__object__status as status,
     lag(status, 1) over (partition by customer_id order by created_at) as prior_status,
     "type" as event_type
-  from stripe_events
+  from events
   where "type" like 'customer.subscription.%'
 
 )
@@ -59,6 +59,5 @@ select
           then coalesce(period_amount, 0)::numeric(38,6) / 12 / 100
         else coalesce(period_amount, 0)::numeric(38,6) / 100
       end
-  end as mrr,
-  product
+  end as mrr
 from filtered

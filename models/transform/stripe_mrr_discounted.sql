@@ -25,8 +25,7 @@ with mrr as (
       else
         mrr
     end as mrr,
-    plan_interval,
-    product
+    plan_interval
   from mrr
     left outer join discounts
       on mrr.date_day = discounts.date_day
