@@ -5,6 +5,7 @@ with mrr as (
 )
 
 select
+  subscription_event_id,
   dateadd(day, 1, date_day)::date as date_day,
   customer_id,
   0::numeric(38,6) as mrr,

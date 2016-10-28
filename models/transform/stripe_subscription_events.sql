@@ -6,10 +6,11 @@ with events as (
 ), filtered as (
 
   select
+    id,
     created as created_at,
     data__object__customer as customer_id,
     data__object__plan__interval as plan_interval,
-    data__object__plan__amount * data__object__quantity as period_amount,
+    data__object__plan__amount * coalesce(data__object__quantity, 1) as period_amount, --need to change the coalesce back, this is just for testing
     data__object__current_period_start as period_start,
     data__object__current_period_end as period_end,
     data__object__start as start,
@@ -22,6 +23,7 @@ with events as (
 )
 
 select
+  id,
   customer_id,
   created_at,
   -- this  is to handle mid-period upgrades, which the stripe subscription records don't give you

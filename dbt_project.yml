@@ -14,4 +14,6 @@ models:
     enabled: true
     materialized: view
     vars:
-      events_table: 'stripe.stripe_events'
+      events_table: "{{ ref('all_events') }}"
+
+profile: code-climate

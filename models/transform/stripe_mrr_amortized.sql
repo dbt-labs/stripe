@@ -10,7 +10,7 @@ with events as (
   --there are a bunch of extra records that we don't need that actually end up clogging the periods.
   --this cte filters those extra records out and deduplicates the remaining ones.
   --duplicates are injected when there are overdue accounts--this causes multiple events for the same period.
-  select
+  select distinct
     customer_id,
     period_start,
     period_end,
@@ -18,11 +18,19 @@ with events as (
     status,
     mrr,
     plan_interval,
-    max(created_at) as created_at
+    last_value(id) over (
+      partition by customer_id, period_start, period_end, event_type, status, mrr, plan_interval
+      order by created_at
+      rows between unbounded preceding and unbounded following
+    ) as id,
+    last_value(created_at) over (
+      partition by customer_id, period_start, period_end, event_type, status, mrr, plan_interval
+      order by created_at
+      rows between unbounded preceding and unbounded following
+    ) as created_at
   from events
   where status not in ('trialing', 'past_due')
     and (event_type != 'customer.subscription.deleted' or prior_status = 'past_due')
-  group by 1, 2, 3, 4, 5, 6, 7
 
 ), customers as (
   -- this CTE grabs the begin and end date for a given customer; we need this to create days records for the entire duration.
@@ -44,6 +52,7 @@ with events as (
 )
 
 select distinct
+  events_filtered.id as subscription_event_id,
   customer_days.customer_id,
   customer_days.date_day,
   coalesce(last_value(mrr) over

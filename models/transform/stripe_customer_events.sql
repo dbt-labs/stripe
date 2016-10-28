@@ -11,3 +11,4 @@ select
   created as created_at,
   "type" as event_type
 from events
+where "type" in ('customer.deleted', 'customer.created', 'customer.updated')

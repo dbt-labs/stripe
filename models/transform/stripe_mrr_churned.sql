@@ -6,6 +6,7 @@ with mrr as (
 
   select
     date_day,
+    subscription_event_id,
     customer_id,
     mrr,
     prior_mrr,

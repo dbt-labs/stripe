@@ -9,6 +9,7 @@ with mrr as (
 ), d1 as (
 
   select
+    mrr.subscription_event_id,
     mrr.date_day,
     mrr.customer_id,
     case discount_type
