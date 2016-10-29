@@ -1,10 +1,4 @@
-{{ config(
-
-  materialized = "table",
-  dist = "customer_id",
-  sort = "date_day"
-
-) }}
+{{ config(materialized = "view") }}
 
 select *
 from {{ref('stripe_mrr_churned')}}
