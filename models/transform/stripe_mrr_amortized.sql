@@ -12,19 +12,35 @@ with events as (
   --duplicates are injected when there are overdue accounts--this causes multiple events for the same period.
   select distinct
     customer_id,
-    period_start,
-    period_end,
-    event_type,
-    status,
-    mrr,
-    plan_interval,
+    period_start::date,
+    period_end::date,
+    last_value(event_type) over (
+      partition by customer_id, period_start::date, period_end::date
+      order by created_at
+      rows between unbounded preceding and unbounded following
+    ) as event_type,
+    last_value(status) over (
+      partition by customer_id, period_start::date, period_end::date
+      order by created_at
+      rows between unbounded preceding and unbounded following
+    ) as status,
+    last_value(mrr) over (
+      partition by customer_id, period_start::date, period_end::date
+      order by created_at
+      rows between unbounded preceding and unbounded following
+    ) as mrr,
+    last_value(plan_interval) over (
+      partition by customer_id, period_start::date, period_end::date
+      order by created_at
+      rows between unbounded preceding and unbounded following
+    ) as plan_interval,
     last_value(id) over (
-      partition by customer_id, period_start, period_end, event_type, status, mrr, plan_interval
+      partition by customer_id, period_start::date, period_end::date
       order by created_at
       rows between unbounded preceding and unbounded following
     ) as id,
     last_value(created_at) over (
-      partition by customer_id, period_start, period_end, event_type, status, mrr, plan_interval
+      partition by customer_id, period_start::date, period_end::date
       order by created_at
       rows between unbounded preceding and unbounded following
     ) as created_at
@@ -46,27 +62,31 @@ with events as (
   select customer_id, date_day
   from customers
     inner join days
-      on customers.customer_start::date <= days.date_day
-      and customers.customer_end::date > days.date_day
+      on customers.customer_start <= days.date_day
+      and customers.customer_end > days.date_day
 
 )
 
 select distinct
-  events_filtered.id as subscription_event_id,
   customer_days.customer_id,
   customer_days.date_day,
   coalesce(last_value(mrr) over
     (partition by customer_days.customer_id, customer_days.date_day
      order by created_at
      rows between unbounded preceding and unbounded following
-   ), 0) as mrr,
-   last_value(plan_interval) over
+    ), 0) as mrr,
+  last_value(events_filtered.id) over
+    (partition by customer_days.customer_id, customer_days.date_day
+     order by created_at
+     rows between unbounded preceding and unbounded following
+   ) as subscription_event_id,
+  last_value(plan_interval) over
      (partition by customer_days.customer_id, customer_days.date_day
       order by created_at
       rows between unbounded preceding and unbounded following
     ) as plan_interval
 from customer_days
   left outer join events_filtered
-    on customer_days.date_day >= events_filtered.period_start::date
-    and customer_days.date_day < events_filtered.period_end::date
+    on customer_days.date_day >= events_filtered.period_start
+    and customer_days.date_day < events_filtered.period_end
     and customer_days.customer_id = events_filtered.customer_id
