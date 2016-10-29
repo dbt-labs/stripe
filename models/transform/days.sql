@@ -11,4 +11,4 @@ with events as (
 
 select *
 from all_the_days
-where date_day <= current_date
+where date_day <= convert_timezone('{{ var('timezone') }}', current_date)

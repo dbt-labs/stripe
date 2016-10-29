@@ -14,6 +14,7 @@ models:
     enabled: true
     materialized: view
     vars:
-      events_table: "{{ ref('all_events') }}"
+      events_table: 'analytics.all_events'
+      timezone: "America/New_York"
 
 profile: code-climate
