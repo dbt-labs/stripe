@@ -1,6 +1,6 @@
 with events as (
 
-  select * from {{ref('stripe_subscription_events')}}
+  select * from {{ref('stripe_subscriptions')}}
 
 ), days as (
 
