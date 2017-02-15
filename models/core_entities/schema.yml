@@ -1,0 +1,29 @@
+stripe_coupons:
+  constraints:
+    not_null:
+      - id
+      - created_at
+    unique:
+      - id
+
+stripe_customers:
+  constraints:
+    not_null:
+      - id
+      - name
+      - created_at
+    unique:
+      - id
+
+stripe_discounts:
+  constraints:
+    not_null:
+      - customer_id
+      - date_day
+      - coupon_id
+      - discount_type
+      - discount_value
+    accepted_values:
+      - {field: discount_type, values: ['amount', 'percent']}
+    unique:
+      - "(customer_id || '|' || date_day)"

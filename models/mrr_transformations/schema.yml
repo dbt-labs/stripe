@@ -1,0 +1,17 @@
+stripe_mrr_amortized:
+  constraints:
+    not_null:
+      - customer_id
+      - date_day
+      - mrr
+    unique:
+      - "(customer_id || '|' || date_day)"
+
+stripe_mrr_discounted:
+  constraints:
+    not_null:
+      - customer_id
+      - date_day
+      - mrr
+    unique:
+      - "(customer_id || '|' || date_day)"

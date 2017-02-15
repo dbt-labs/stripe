@@ -1,25 +1,6 @@
--- Start with customer.subscription.* raw stripe events
 with events as (
 
-  select * from {{ref('stripe_events')}}
-
-), filtered as (
-
-  select
-    id,
-    created as created_at,
-    data__object__customer as customer_id,
-    data__object__plan__interval as plan_interval,
-    data__object__quantity as quantity,
-    data__object__plan__amount * coalesce(data__object__quantity, 1) as period_amount, --need to change the coalesce back, this is just for testing
-    data__object__current_period_start as period_start,
-    data__object__current_period_end as period_end,
-    data__object__start as start,
-    data__object__status as status,
-    lag(status, 1) over (partition by customer_id order by created_at) as prior_status,
-    "type" as event_type
-  from events
-  where "type" like 'customer.subscription.%'
+  select * from {{ref('stripe_subscription_events')}}
 
 )
 
@@ -64,4 +45,4 @@ select
         else coalesce(period_amount, 0)::numeric(38,6) / 100
       end
   end as mrr
-from filtered
+from events
