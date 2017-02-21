@@ -16,6 +16,7 @@ select
   data__object__start as start,
   data__object__status as status,
   lag(status, 1) over (partition by customer_id order by created_at) as prior_status,
-  "type" as event_type
+  "type" as event_type,
+  data__object__plan__id as plan_id
 from events
 where "type" like 'customer.subscription.%'

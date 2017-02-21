@@ -31,6 +31,7 @@ select
   status,
   prior_status,
   plan_interval,
+  plan_id,
   quantity,
   case status
     -- Special case: The events for cancellations have positive
