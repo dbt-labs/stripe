@@ -7,7 +7,7 @@ with events as (
 )
 
 select distinct
-    invoice_item_id as id,
+    id,
 
     last_value(invoice_id) over ( {{ partition_clause }} ) as invoice_id,
     last_value(customer_id) over ( {{ partition_clause }} ) as customer_id,

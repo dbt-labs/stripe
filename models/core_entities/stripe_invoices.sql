@@ -1,4 +1,4 @@
-{% set partition_clause = "partition by invoice_id order by created_at rows between unbounded preceding and unbounded following" %}
+{% set partition_clause = "partition by id order by created_at rows between unbounded preceding and unbounded following" %}
 
 with events as (
 
@@ -8,7 +8,7 @@ with events as (
 
     select distinct
 
-        invoice_id,
+        id,
 
         last_value(subscription_id) over ( {{ partition_clause }} ) as subscription_id,
         last_value(charge_id) over ( {{ partition_clause }} ) as charge_id,
@@ -35,8 +35,36 @@ with events as (
 ), final as (
 
     select
-        *,
+
+        id,
+        subscription_id,
+        charge_id,
+        customer_id,
+        event_id,
+        invoice_date,
+        period_start,
+        period_end,
+        currency,
+        attempt_count,
+        attempted,
+        closed,
+        total,
+        subtotal,
+        amount_due,
+        next_payment_attempt,
+        paid,
+        --sometimes forgiven is null but it's clear that it shouldn't be
+        --and we can infer the value (we can't always infer successfully)
+        --this only happens to records prior to 2015.
+        case
+            when forgiven is not null then forgiven
+            else
+                case when paid = true then false end
+        end as forgiven,
+
+        created_at,
         total - amount_due as amount_paid
+
     from consolidated
 
 )

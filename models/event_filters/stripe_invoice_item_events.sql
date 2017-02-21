@@ -1,12 +1,12 @@
 with events as (
 
-    select * from {{var('events_table')}}
+    select * from {{ref('stripe_events')}}
 
 )
 
 select
 
-    data__object__id as invoice_item_id,
+    data__object__id as id,
     data__object__invoice as invoice_id,
     data__object__customer as customer_id,
     id as event_id,

@@ -1,29 +1,93 @@
 stripe_coupons:
-  constraints:
-    not_null:
-      - id
-      - created_at
-    unique:
-      - id
+    constraints:
+        not_null:
+            - id
+            - created_at
+        unique:
+            - id
 
 stripe_customers:
-  constraints:
-    not_null:
-      - id
-      - name
-      - created_at
-    unique:
-      - id
+    constraints:
+        not_null:
+            - id
+            - name
+            - created_at
+        unique:
+            - id
 
 stripe_discounts:
-  constraints:
-    not_null:
-      - customer_id
-      - date_day
-      - coupon_id
-      - discount_type
-      - discount_value
-    accepted_values:
-      - {field: discount_type, values: ['amount', 'percent']}
-    unique:
-      - "(customer_id || '|' || date_day)"
+    constraints:
+        not_null:
+            - customer_id
+            - date_day
+            - coupon_id
+            - discount_type
+            - discount_value
+        accepted_values:
+            - {field: discount_type, values: ['amount', 'percent']}
+        unique:
+            - "(customer_id || '|' || date_day)"
+        relationships:
+            - {from: customer_id, to: stripe_customers, field: id}
+
+stripe_invoices:
+    constraints:
+        not_null:
+            - id
+            - customer_id
+            - event_id
+            - period_start
+            - period_end
+            #sometimes old invoices don't have currencies
+            - "case when created_at > to_date('01/01/2015', 'mm/dd/yyyy') then currency else 'ok' end"
+            - total
+            - subtotal
+            - amount_due
+            - paid
+            #sometimes old invoices don't have values for forgiven
+            - "case when created_at > to_date('01/01/2015', 'mm/dd/yyyy') then forgiven else true end"
+            - created_at
+            - amount_paid
+        unique:
+            - id
+        relationships:
+            - {from: customer_id, to: stripe_customers, field: id}
+
+
+stripe_invoice_items:
+    constraints:
+        not_null:
+            - id
+            - customer_id
+            - event_id
+            - invoice_date
+            - amount
+            - currency
+            - created_at
+        unique:
+            - id
+        relationships:
+            - {from: customer_id, to: stripe_customers, field: id}
+            - {from: invoice_id, to: stripe_invoices, field: id}
+
+
+stripe_subscriptions:
+    constraints:
+        not_null:
+            - customer_id
+            - created_at
+            - period_start
+            - period_end
+            - event_type
+            - status
+            - plan_interval
+            - mrr
+        accepted_values:
+            - {field: plan_interval, values: ['month', 'year']}
+        relationships:
+            - {from: customer_id, to: stripe_customers, field: id}
+
+stripe_discounts:
+    constraints:
+        relationships:
+            - {from: coupon_id, to: stripe_coupons, field: id}
