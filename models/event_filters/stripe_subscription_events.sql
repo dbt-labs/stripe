@@ -5,7 +5,8 @@ with events as (
 )
 
 select
-  id,
+  data__object__id as id,
+  id as event_id,
   created as created_at,
   data__object__customer as customer_id,
   data__object__plan__interval as plan_interval,

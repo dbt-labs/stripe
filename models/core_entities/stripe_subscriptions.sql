@@ -6,6 +6,7 @@ with events as (
 
 select
   id,
+  event_id,
   customer_id,
   created_at,
   -- this  is to handle mid-period upgrades, which the stripe subscription records don't give you
