@@ -1,4 +1,4 @@
-{% set partition_clause = "partition by invoice_item_id order by created_at rows between unbounded preceding and unbounded following" %}
+{% set partition_clause = "partition by id order by created_at rows between unbounded preceding and unbounded following" %}
 
 with events as (
 
