@@ -1,50 +1,37 @@
+{% set partition_clause = "partition by id, period_start order by created_at rows between unbounded preceding and unbounded following" %}
+
 with events as (
 
-  select * from {{ref('stripe_subscription_events')}}
+    select * from {{ref('stripe_subscription_events')}}
+
+),
+
+final as (
+
+    select distinct
+
+        id,
+
+        last_value(event_id) over ( {{ partition_clause }} ) as event_id,
+        last_value(customer_id) over ( {{ partition_clause }} ) as customer_id,
+
+        last_value(created_at) over ( {{ partition_clause }} ) as created_at,
+
+        last_value(status) over ( {{ partition_clause }} ) as status,
+        last_value(event_type) over ( {{ partition_clause }} ) as event_type,
+
+        last_value(start) over ( {{ partition_clause }} ) as start,
+        last_value(period_start) over ( {{ partition_clause }} ) as period_start,
+        last_value(period_end) over ( {{ partition_clause }} ) as period_end,
+
+        last_value(quantity) over ( {{ partition_clause }} ) as quantity,
+
+        last_value(plan_id) over ( {{ partition_clause }} ) as plan_id,
+        last_value(plan_interval) over ( {{ partition_clause }} ) as plan_interval,
+        last_value(plan_amount) over ( {{ partition_clause }} ) as plan_amount
+
+    from events
 
 )
 
-select
-  id,
-  event_id,
-  customer_id,
-  created_at,
-  -- this  is to handle mid-period upgrades, which the stripe subscription records don't give you
-  -- a lot of clue what is going on. you need to determine if this start date is the same as the previous start date and
-  -- infer from that whether there is something new going on.
-  case status
-    when 'active' then
-      case start
-        when lag(start, 1) over (partition by customer_id order by created_at)
-          then period_start
-        else start
-      end
-    when 'canceled' then
-      case
-        when prior_status = 'past_due'
-          then period_start
-        else created_at
-      end
-    else period_start
-  end as period_start,
-  period_end,
-  event_type,
-  status,
-  prior_status,
-  plan_interval,
-  plan_id,
-  quantity,
-  case status
-    -- Special case: The events for cancellations have positive
-    -- period_amount values so we need to treat them as zeros
-    when 'canceled'
-      then 0
-    else
-      -- Normalize annual billing to monthly using simple division
-      case plan_interval
-        when 'year'
-          then coalesce(period_amount, 0)::numeric(38,6) / 12 / 100
-        else coalesce(period_amount, 0)::numeric(38,6) / 100
-      end
-  end as mrr
-from events
+select * from final
