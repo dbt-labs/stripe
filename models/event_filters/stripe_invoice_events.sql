@@ -7,10 +7,10 @@ with events as (
 select
 
     data__object__id as id,
-    data__object__subscription as subscription_id,
-    data__object__charge as charge_id,
-    data__object__customer as customer_id,
-    id as event_id,
+    nullif(data__object__subscription, '') as subscription_id,
+    nullif(data__object__charge, '') as charge_id,
+    nullif(data__object__customer, '') as customer_id,
+    nullif(id, '') as event_id,
 
     "type" as event_type,
 
@@ -36,4 +36,3 @@ select
 from events
 where "type" like 'invoice.%'
     and "type" not like '%payment%'
-    and livemode = true

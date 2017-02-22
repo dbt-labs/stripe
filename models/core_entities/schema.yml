@@ -52,6 +52,7 @@ stripe_invoices:
             - id
         relationships:
             - {from: customer_id, to: stripe_customers, field: id}
+            - {from: subscription_id, to: stripe_subscriptions, field: id}
 
 
 stripe_invoice_items:

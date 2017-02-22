@@ -7,9 +7,9 @@ with events as (
 select
 
     data__object__id as id,
-    data__object__invoice as invoice_id,
-    data__object__customer as customer_id,
-    id as event_id,
+    nullif(data__object__invoice, '') as invoice_id,
+    nullif(data__object__customer, '') as customer_id,
+    nullif(id, '') as event_id,
 
     "type" as event_type,
 
@@ -26,5 +26,3 @@ select
 
 from events
 where "type" like 'invoiceitem.%'
-    and livemode = true
-order by created desc
