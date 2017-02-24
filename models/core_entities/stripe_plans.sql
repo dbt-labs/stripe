@@ -6,7 +6,7 @@ with events as (
 
 core as (
 
-    select
+    select distinct
 
         id,
 
