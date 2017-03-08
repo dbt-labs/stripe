@@ -20,6 +20,7 @@ final as (
         data__object__start as start,
         data__object__current_period_start as period_start,
         data__object__current_period_end as period_end,
+        data__object__canceled_at as canceled_at,
 
         data__object__quantity as quantity,
 

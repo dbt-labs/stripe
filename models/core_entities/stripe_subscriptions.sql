@@ -23,6 +23,7 @@ final as (
         last_value(start) over ( {{ partition_clause }} ) as start,
         last_value(period_start) over ( {{ partition_clause }} ) as period_start,
         last_value(period_end) over ( {{ partition_clause }} ) as period_end,
+        last_value(canceled_at) over ( {{ partition_clause}} ) as canceled_at,
 
         last_value(quantity) over ( {{ partition_clause }} ) as quantity,
 
