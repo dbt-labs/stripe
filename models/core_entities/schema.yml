@@ -28,7 +28,7 @@ stripe_discounts:
         unique:
             - "(customer_id || '|' || date_day)"
         relationships:
-            - {from: customer_id, to: stripe_customers, field: id}
+            - {from: customer_id, to: ref('stripe_customers'), field: id}
 
 stripe_invoices:
     constraints:
@@ -52,7 +52,7 @@ stripe_invoices:
             - id
         relationships:
             - {from: customer_id, to: stripe_customers, field: id}
-            - {from: subscription_id, to: stripe_subscriptions, field: id}
+            - {from: subscription_id, to: ref('stripe_subscriptions'), field: id}
 
 
 stripe_invoice_items:
@@ -68,8 +68,8 @@ stripe_invoice_items:
         unique:
             - id
         relationships:
-            - {from: customer_id, to: stripe_customers, field: id}
-            - {from: invoice_id, to: stripe_invoices, field: id}
+            - {from: customer_id, to: ref('stripe_customers'), field: id}
+            - {from: invoice_id, to: ref('stripe_invoices'), field: id}
 
 
 stripe_subscriptions:
@@ -85,9 +85,9 @@ stripe_subscriptions:
         accepted_values:
             - {field: plan_interval, values: ['month', 'year']}
         relationships:
-            - {from: customer_id, to: stripe_customers, field: id}
+            - {from: customer_id, to: ref('stripe_customers'), field: id}
 
 stripe_discounts:
     constraints:
         relationships:
-            - {from: coupon_id, to: stripe_coupons, field: id}
+            - {from: coupon_id, to: ref('stripe_coupons'), field: id}
