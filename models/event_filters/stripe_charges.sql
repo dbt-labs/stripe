@@ -5,7 +5,7 @@ with charges as (
 )
 
 select
-  id,
+  data__object__id as id,
   data__object__customer as customer_id,
   data__object__invoice as invoice_id,
   data__object__balance_transaction as balance_transaction_id,
