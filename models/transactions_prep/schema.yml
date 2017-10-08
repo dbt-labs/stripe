@@ -1,0 +1,16 @@
+stripe_transactions:
+    constraints:
+        not_null:
+            - source_item_id
+            - source_item_type
+            - customer_id
+            - invoice_date
+            - amount
+            - duration
+            - paid
+
+stripe_subscription_transactions:
+    constraints:
+        not_null:
+            - period_start
+            - period_end
