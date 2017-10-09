@@ -15,5 +15,3 @@ models:
     vars:
       events_table: 'stripe.stripe_events' #put your events table here.
       timezone: "America/New_York"
-
-profile: customerio
