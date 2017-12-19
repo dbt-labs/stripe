@@ -16,6 +16,9 @@ final as (
         period_start,
 
         case
+            when duration = 'year'
+                then period_end
+
             when max_period_start <= date_part(day, period_end) then period_end
 
             else

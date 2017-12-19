@@ -1,9 +1,3 @@
-{{
-    config(
-        materialized = 'ephemeral'
-    )
-}}
-
 with joined as (
 
     select * from {{ref('stripe_subscription_transactions_joined')}}
@@ -38,7 +32,15 @@ incremented as (
         plan_id,
         forgiven,
         paid,
-        duration
+        duration,
+
+        case
+            when row_number() over (partition by customer_id order by invoice_date) = 1
+            and duration = 'year'
+            and amount = 0
+                then 1
+            else 0
+        end as annual_flag
 
     from joined
 
@@ -59,6 +61,7 @@ final as (
         ) as following_period_start
 
     from incremented
+    where annual_flag = 0
 
 )
 

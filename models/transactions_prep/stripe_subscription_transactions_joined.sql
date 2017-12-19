@@ -1,9 +1,3 @@
-{{
-    config(
-        materialized = 'ephemeral'
-    )
-}}
-
 with invoices as (
 
     select * from {{ref('stripe_invoices')}}
@@ -30,8 +24,7 @@ amount_from_items as (
         invoice_id,
         sum(discounted_amount) as amount
     from items
-    where proration = false
-        and deleted_at is null
+    where deleted_at is null
     group by 1
 
 ),
@@ -51,7 +44,13 @@ joined as (
         subscriptions.plan_id,
         invoices.forgiven,
         invoices.paid,
-        coalesce(plan_interval, 'month') as duration
+        case
+            when plan_interval is not null
+                then plan_interval
+            when datediff(month, invoices.period_start, invoices.period_end) > 1
+                then 'year'
+            else 'month'
+        end as duration
 
     from invoices
 
