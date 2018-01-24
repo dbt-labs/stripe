@@ -14,12 +14,17 @@ final as (
 
     select
 
-        'proration item' as source_item_type,
+        'proration item'::varchar as source_item_type,
         items.id as source_item_id,
         items.subscription_id,
         items.customer_id,
         items.invoice_date,
-        items.period_start,
+        case
+            when invoices.subscription_id is null
+            and datediff(month, items.period_start, items.period_end) <= 1
+                then items.period_end
+            else items.period_start
+        end as period_start,
         items.period_end,
         items.amount,
         items.plan_id,

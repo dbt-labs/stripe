@@ -9,6 +9,7 @@ clean-targets: ["target"]
 test-paths: ["test"]
 data-paths: ["data"]
 
+
 models:
   stripe:
     materialized: view

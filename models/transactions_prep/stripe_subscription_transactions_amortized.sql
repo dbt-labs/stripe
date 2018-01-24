@@ -1,77 +1,45 @@
+{{ config(
+  materialized = "table",
+  dist = "customer_id",
+  sort = "transaction_date"
+) }}
+
+{% set frame_clause = 'over (partition by customer_id, date_month
+    order by transaction_date rows between unbounded preceding and unbounded
+    following)'%}
+
+--this model rolls up the daily amortization of invoices to the last value for
+--a customer in a given month
+
 with transactions as (
 
-    select * from {{ref('stripe_subscription_transactions')}}
+    select * from {{ref('stripe_subscription_transactions_amortized_daily')}}
 
 ),
 
-prorations as (
+rollup as (
 
-    select * from {{ref('stripe_proration_transactions')}}
+    select distinct
 
-),
-
-months as (
-
-    select * from {{ref('months')}}
-
-),
-
-unioned as (
-
-    select * from transactions
-    union all
-    select * from prorations
-
-),
-
-amortized as (
-
-    select
-
-        unioned.*,
-
-        dateadd(
-            month,
-            datediff(month, date_trunc('month', unioned.period_start), date_month),
-            invoice_date
-        ) as transaction_date
-
-
-    from unioned
-
-    inner join months
-        on date_trunc('month', unioned.period_start) <= months.date_month
-        and date_trunc('month', unioned.period_end) > months.date_month
-
-),
-
-final as (
-
-    select
-
-        source_item_type,
-        source_item_id,
-        subscription_id,
+        last_value(source_item_type) {{frame_clause}} as source_item_type,
+        last_value(source_item_id) {{frame_clause}} as source_item_id,
+        last_value(subscription_id) {{frame_clause}} as subscription_id,
         customer_id,
-        transaction_date,
-        invoice_date,
-        period_start,
-        period_end,
+        min(case when rev_rec_date_base = 1 then transaction_date else null end)
+            {{frame_clause}} as transaction_date,
+        max(invoice_date) {{frame_clause}} as invoice_date,
+        max(period_start) {{frame_clause}} as period_start,
+        max(period_end) {{frame_clause}} as period_end,
+        sum(case when customer_last_month_value = 1 then mrr_amount else null end)
+            over (partition by customer_id, date_month order by transaction_date
+            rows between unbounded preceding and unbounded following) as amount,
+        last_value(plan_id) {{frame_clause}} as plan_id,
+        last_value(forgiven) {{frame_clause}} as forgiven,
+        last_value(paid) {{frame_clause}} as paid,
+        last_value(duration) {{frame_clause}} as duration
 
-        case
-            when duration = 'month' then amount
-            when duration = 'year' then amount /
-                datediff(month, period_start, period_end)
-        end as amount,
-
-        plan_id,
-        forgiven,
-        paid,
-        duration
-
-    from amortized
-
+    from transactions
 
 )
 
-select * from final
+select * from rollup
