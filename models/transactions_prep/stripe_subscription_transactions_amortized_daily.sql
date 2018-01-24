@@ -70,6 +70,14 @@ calculated as (
             else null
         end as customer_last_month_value,
         case
+            when invoice_day = transaction_day
+                then 1
+            when invoice_day > month_days
+            and transaction_day = month_days
+                then 1
+            else null
+        end as rev_rec_date_base,
+        case
             when max(date_month) over (partition by customer_id order by
             date_month rows between unbounded preceding and unbounded following)
             = date_month
