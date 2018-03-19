@@ -23,7 +23,7 @@ mrr_with_changes as (
             lag(mrr) over (partition by customer_id order by date_month),
             0) as prior_mrr,
 
-        mrr - coalesce(
+        coalesce(mrr,0) - coalesce(
             lag(mrr) over (partition by customer_id order by date_month),
             0
             ) as mrr_change
