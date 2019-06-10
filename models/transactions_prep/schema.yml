@@ -1,16 +1,33 @@
-stripe_transactions:
-    constraints:
-        not_null:
-            - source_item_id
-            - source_item_type
-            - customer_id
-            - invoice_date
-            - amount
-            - duration
-            - paid
-
-stripe_subscription_transactions:
-    constraints:
-        not_null:
-            - period_start
-            - period_end
+version: 2
+models:
+- name: stripe_transactions
+  columns:
+  - name: amount
+    tests:
+    - not_null
+  - name: customer_id
+    tests:
+    - not_null
+  - name: duration
+    tests:
+    - not_null
+  - name: invoice_date
+    tests:
+    - not_null
+  - name: paid
+    tests:
+    - not_null
+  - name: source_item_id
+    tests:
+    - not_null
+  - name: source_item_type
+    tests:
+    - not_null
+- name: stripe_subscription_transactions
+  columns:
+  - name: period_end
+    tests:
+    - not_null
+  - name: period_start
+    tests:
+    - not_null

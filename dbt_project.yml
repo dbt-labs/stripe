@@ -1,6 +1,7 @@
 
 name: 'stripe'
 version: '1.0'
+require-dbt-version: ">0.13.0"
 
 source-paths: ["models"]
 analysis-paths: ["analysis"]

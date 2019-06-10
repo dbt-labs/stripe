@@ -1,93 +1,144 @@
-stripe_coupons:
-    constraints:
-        not_null:
-            - id
-            - created_at
-        unique:
-            - id
-
-stripe_customers:
-    constraints:
-        not_null:
-            - id
-            - name
-            - created_at
-        unique:
-            - id
-
-stripe_discounts:
-    constraints:
-        not_null:
-            - customer_id
-            - date_day
-            - coupon_id
-            - discount_type
-            - discount_value
-        accepted_values:
-            - {field: discount_type, values: ['amount', 'percent']}
-        unique:
-            - "(customer_id || '|' || date_day)"
-        relationships:
-            - {from: customer_id, to: ref('stripe_customers'), field: id}
-
-stripe_invoices:
-    constraints:
-        not_null:
-            - id
-            - customer_id
-            - event_id
-            - period_start
-            - period_end
-            #sometimes old invoices don't have currencies
-            - "case when created_at > to_date('01/01/2015', 'mm/dd/yyyy') then currency else 'ok' end"
-            - total
-            - subtotal
-            - amount_due
-            - paid
-            #sometimes old invoices don't have values for forgiven
-            - "case when created_at > to_date('01/01/2015', 'mm/dd/yyyy') then forgiven else true end"
-            - created_at
-            - amount_paid
-        unique:
-            - id
-        relationships:
-            - {from: customer_id, to: ref('stripe_customers'), field: id}
-            - {from: subscription_id, to: ref('stripe_subscriptions'), field: id}
-
-
-stripe_invoice_items:
-    constraints:
-        not_null:
-            - id
-            - customer_id
-            - event_id
-            - invoice_date
-            - amount
-            - currency
-            - created_at
-        unique:
-            - id
-        relationships:
-            - {from: customer_id, to: ref('stripe_customers'), field: id}
-            - {from: invoice_id, to: ref('stripe_invoices'), field: id}
-
-
-stripe_subscriptions:
-    constraints:
-        not_null:
-            - customer_id
-            - created_at
-            - period_start
-            - period_end
-            - event_type
-            - status
-            - plan_interval
-        accepted_values:
-            - {field: plan_interval, values: ['month', 'year']}
-        relationships:
-            - {from: customer_id, to: ref('stripe_customers'), field: id}
-
-stripe_discounts:
-    constraints:
-        relationships:
-            - {from: coupon_id, to: ref('stripe_coupons'), field: id}
+version: 2
+models:
+- name: stripe_coupons
+  columns:
+  - name: created_at
+    tests:
+    - not_null
+  - name: id
+    tests:
+    - not_null
+    - unique
+- name: stripe_customers
+  columns:
+  - name: created_at
+    tests:
+    - not_null
+  - name: id
+    tests:
+    - not_null
+    - unique
+  - name: name
+    tests:
+    - not_null
+- name: stripe_discounts
+  columns:
+  - name: coupon_id
+    tests:
+    - relationships:
+        field: id
+        to: ref('stripe_coupons')
+- name: stripe_invoices
+  columns:
+  - name: amount_due
+    tests:
+    - not_null
+  - name: amount_paid
+    tests:
+    - not_null
+  - name: case when created_at > to_date('01/01/2015', 'mm/dd/yyyy') then currency
+      else 'ok' end
+    tests:
+    - not_null
+  - name: case when created_at > to_date('01/01/2015', 'mm/dd/yyyy') then forgiven
+      else true end
+    tests:
+    - not_null
+  - name: created_at
+    tests:
+    - not_null
+  - name: customer_id
+    tests:
+    - not_null
+    - relationships:
+        field: id
+        to: ref('stripe_customers')
+  - name: event_id
+    tests:
+    - not_null
+  - name: id
+    tests:
+    - not_null
+    - unique
+  - name: paid
+    tests:
+    - not_null
+  - name: period_end
+    tests:
+    - not_null
+  - name: period_start
+    tests:
+    - not_null
+  - name: subscription_id
+    tests:
+    - relationships:
+        field: id
+        to: ref('stripe_subscriptions')
+  - name: subtotal
+    tests:
+    - not_null
+  - name: total
+    tests:
+    - not_null
+- name: stripe_invoice_items
+  columns:
+  - name: amount
+    tests:
+    - not_null
+  - name: created_at
+    tests:
+    - not_null
+  - name: currency
+    tests:
+    - not_null
+  - name: customer_id
+    tests:
+    - not_null
+    - relationships:
+        field: id
+        to: ref('stripe_customers')
+  - name: event_id
+    tests:
+    - not_null
+  - name: id
+    tests:
+    - not_null
+    - unique
+  - name: invoice_date
+    tests:
+    - not_null
+  - name: invoice_id
+    tests:
+    - relationships:
+        field: id
+        to: ref('stripe_invoices')
+- name: stripe_subscriptions
+  columns:
+  - name: created_at
+    tests:
+    - not_null
+  - name: customer_id
+    tests:
+    - not_null
+    - relationships:
+        field: id
+        to: ref('stripe_customers')
+  - name: event_type
+    tests:
+    - not_null
+  - name: period_end
+    tests:
+    - not_null
+  - name: period_start
+    tests:
+    - not_null
+  - name: plan_interval
+    tests:
+    - accepted_values:
+        values:
+        - month
+        - year
+    - not_null
+  - name: status
+    tests:
+    - not_null
