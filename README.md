@@ -1,4 +1,6 @@
-# Stripe
+# [Deprecated] Stripe
+
+> ⚠️ **WARNING!** This package is no longer maintained. We do not recommend adding it to your dbt project. This code remains public to prevent breaking changes to any existing dbt projects that use this package.
 
 A collection of SQL-based analytics for Stripe.
 
@@ -18,7 +20,7 @@ All data models are built to be compiled and run with [dbt](https://github.com/a
     materialized: view
     vars:
       #insert the location of your stripe_events table here as 'schema.table'
-      events_table: 'stripe.stripe_events'  
+      events_table: 'stripe.stripe_events'
 ```
 
 ### Contributing
